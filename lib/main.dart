@@ -1,102 +1,108 @@
+import 'package:basketball_dashborad_app/cubits/counter_cubit.dart';
+import 'package:basketball_dashborad_app/cubits/counter_states.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   runApp(BasketballDashBoard());
 }
 
-class BasketballDashBoard extends StatefulWidget {
+class BasketballDashBoard extends StatelessWidget {
   const BasketballDashBoard({super.key});
 
   @override
-  State<BasketballDashBoard> createState() => _BasketballDashBoardState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => CounterCubit(),
+      child: MaterialApp(debugShowCheckedModeBanner: false, home: HomePage()),
+    );
+  }
 }
 
-class _BasketballDashBoardState extends State<BasketballDashBoard> {
-  int teamAPoints = 0;
-  int teamBPoints = 0;
-
-  void resetPoints() {
-    setState(() {
-      teamAPoints = 0;
-      teamBPoints = 0;
-    });
-  }
-
-  void addPoints(String team, int points) {
-    setState(() {
-      if (team == "Team A") {
-        teamAPoints += points;
-      } else {
-        teamBPoints += points;
-      }
-    });
-  }
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          title: Text("Points Counter"),
-          backgroundColor: Colors.amber,
-        ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 500,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TeamColumn(
-                    teamName: "Team A",
-                    numberOfPoints: teamAPoints,
-                    onAddPoints: (points) => addPoints("Team A", points),
-                  ),
-                  VerticalDivider(
-                    color: Colors.grey,
-                    thickness: 2,
-                    indent: 20,
-                    endIndent: 10,
-                  ),
-                  TeamColumn(
-                    teamName: "Team B",
-                    numberOfPoints: teamBPoints,
-                    onAddPoints: (points) => addPoints("Team B", points),
-                  ),
-                ],
+    return BlocConsumer<CounterCubit, CounterStates>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            title: Text("Points Counter"),
+            backgroundColor: Colors.amber,
+          ),
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 500,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TeamColumn(
+                      teamName: "Team A",
+                      numberOfPoints: BlocProvider.of<CounterCubit>(
+                        context,
+                      ).teamAPoints,
+                      onAddPoints: (points) {
+                        BlocProvider.of<CounterCubit>(
+                          context,
+                        ).teamIncreament(team: 'A', buttonNumber: points);
+                      },
+                    ),
+                    VerticalDivider(
+                      color: Colors.grey,
+                      thickness: 2,
+                      indent: 20,
+                      endIndent: 10,
+                    ),
+                    TeamColumn(
+                      teamName: "Team B",
+                      numberOfPoints: BlocProvider.of<CounterCubit>(
+                        context,
+                      ).teamBPoints,
+                      onAddPoints: (points) {
+                        BlocProvider.of<CounterCubit>(
+                          context,
+                        ).teamIncreament(team: 'B', buttonNumber: points);
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 100),
-            ElevatedButton(
-              onPressed: resetPoints,
+              SizedBox(height: 100),
+              ElevatedButton(
+                onPressed: () {
+                  BlocProvider.of<CounterCubit>(context).resetCounter();
+                },
 
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amber,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadiusGeometry.all(Radius.circular(5)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadiusGeometry.all(Radius.circular(5)),
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 10,
-                ),
-                child: Text(
-                  "Reset",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    "Reset",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
